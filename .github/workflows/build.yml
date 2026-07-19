@@ -55,3 +55,14 @@ jobs:
         name: pkgi-ps3-build_${{ env.sha_name }}
         path: pkgi-ps3.pkg
         if-no-files-found: error
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+      with:
+        files: pkgi-ps3.pkg
+        name: PKGi PS3 Classic Store UI
+        tag_name: classic-store-v1
+        draft: false
+        prerelease: true
+        generate_release_notes: true
