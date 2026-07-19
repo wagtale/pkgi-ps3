@@ -6,10 +6,15 @@
 // Stubs for removed pkgi_menu
 #define MenuResult int
 #define MenuResultRefresh 1
+#define MenuResultSearch 2
+#define MenuResultSearchClear 3
+#define MenuResultCancel 4
+#define MenuResultAccept 5
 #define pkgi_menu_is_open() (0)
 #define pkgi_menu_result() (0)
 #define pkgi_menu_start(search, cfg) ((void)0)
 #define pkgi_menu_get(cfg) ((void)0)
+#define pkgi_do_menu(input) (0)
 
 typedef enum {
     STORE_STATE_CATEGORIES,
