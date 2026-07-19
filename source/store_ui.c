@@ -1,71 +1,68 @@
 #include "store_ui.h"
-#include "pkgi_menu.h"
 #include "pkgi_config.h"
 #include "pkgi_dialog.h"
 #include "pkgi_download.h"
 #include "pkgi_utils.h"
 #include "pkgi_style.h"
 
-static StoreState current_state = STORE_STATE_CATEGORIES;
+static StoreState current_state = STORE_STATE_GRID;
 
-// 2006 Store Layout Constants
-static const int SIDEBAR_WIDTH = 250;
-static const int TOPBAR_HEIGHT = 70;
+// 2008 Store Layout Constants
+static const int TOPBAR_HEIGHT = 100;
 
-// Sidebar Variables
-static int sidebar_selected = 0;
-static const char* sidebar_items[] = {
+// Top Menu Variables
+static int topmenu_selected = 0;
+static const char* topmenu_items[] = {
+    "Search",
     "Latest",
-    "Games",
-    "Game Add-ons",
-    "Themes & Avatars",
-    "Search"
+    "PS3 Games",
+    "PS1 Classics",
+    "Add-ons",
+    "Themes"
 };
-static const int NUM_SIDEBAR_ITEMS = 5;
+static const int NUM_TOPMENU_ITEMS = 6;
 
 // Grid Variables
 static uint32_t grid_selected_x = 0;
 static uint32_t grid_selected_y = 0;
 static uint32_t grid_scroll_y = 0;
-static const int GRID_COLS = 3;
+static const int GRID_COLS = 4;
 static const int GRID_COVER_W = 160;
 static const int GRID_COVER_H = 160;
-static const int GRID_PADDING = 15;
+static const int GRID_PADDING = 20;
 
 void store_ui_init(void) {
-    current_state = STORE_STATE_CATEGORIES;
-    sidebar_selected = 0;
+    current_state = STORE_STATE_GRID;
+    topmenu_selected = 1;
     grid_selected_x = 0;
     grid_selected_y = 0;
     grid_scroll_y = 0;
 }
 
 void store_ui_start(void) {
-    current_state = STORE_STATE_CATEGORIES;
+    current_state = STORE_STATE_GRID;
+}
+
+static void draw_background(void) {
+    // 2008 Store: Deep ocean blue background
+    pkgi_draw_fill_rect(0, 0, VITA_WIDTH, VITA_HEIGHT, 0x00441100); // 0xAABBGGRR - Deep blue: R=00, G=11, B=44
 }
 
 static void draw_top_bar(void) {
-    // 2006 Store Top Bar: Very dark blue/black header
-    pkgi_draw_fill_rect(0, 0, VITA_WIDTH, TOPBAR_HEIGHT, 0x00111111); // Dark charcoal
-    pkgi_draw_text(20, 25, 0x00FFFFFF, "PLAYSTATION(R)Store");
-    pkgi_draw_text(VITA_WIDTH - 200, 25, 0x00AAAAAA, "View Cart | Settings");
-}
-
-static void draw_sidebar(void) {
-    // 2006 Store Left Sidebar: Dark translucent background
-    pkgi_draw_fill_rect(0, TOPBAR_HEIGHT, SIDEBAR_WIDTH, VITA_HEIGHT - TOPBAR_HEIGHT, 0xAA000000);
-
-    for (int i = 0; i < NUM_SIDEBAR_ITEMS; i++) {
-        int y = TOPBAR_HEIGHT + 30 + (i * 50);
-        
-        if (i == sidebar_selected && current_state == STORE_STATE_CATEGORIES) {
-            // Selected item: Light blue background highlight (Classic 2006 style)
-            pkgi_draw_fill_rect(10, y - 10, SIDEBAR_WIDTH - 20, 40, 0x0088CCFF);
-            pkgi_draw_text(20, y, 0x00000000, sidebar_items[i]); // Black text on blue
+    // Top bar area
+    pkgi_draw_fill_rect(0, 0, VITA_WIDTH, TOPBAR_HEIGHT, 0x55000000); // Translucent black overlay
+    
+    // Top Menu Items (Horizontal)
+    int start_x = 50;
+    for (int i = 0; i < NUM_TOPMENU_ITEMS; i++) {
+        if (i == topmenu_selected && current_state == STORE_STATE_CATEGORIES) {
+            // Highlighted top category
+            pkgi_draw_fill_rect(start_x - 10, 35, pkgi_text_width(topmenu_items[i]) + 20, 40, 0x00DDDDDD);
+            pkgi_draw_text(start_x, 45, 0x00000000, topmenu_items[i]);
         } else {
-            // Unselected item
-            pkgi_draw_text(20, y, 0x00FFFFFF, sidebar_items[i]);
+            pkgi_draw_text(start_x, 45, (i == topmenu_selected) ? 0x00FFFFFF : 0x00AAAAAA, topmenu_items[i]);
         }
+        start_x += pkgi_text_width(topmenu_items[i]) + 40;
     }
 }
 
@@ -75,22 +72,18 @@ static void draw_grid_view(pkgi_input* input) {
     // Input Handling
     if (input) {
         if (current_state == STORE_STATE_CATEGORIES) {
-            if (input->pressed & PKGI_BUTTON_DOWN) {
-                if (sidebar_selected < NUM_SIDEBAR_ITEMS - 1) sidebar_selected++;
-            }
-            if (input->pressed & PKGI_BUTTON_UP) {
-                if (sidebar_selected > 0) sidebar_selected--;
-            }
             if (input->pressed & PKGI_BUTTON_RIGHT) {
-                current_state = STORE_STATE_GRID; // Move focus to grid
+                if (topmenu_selected < NUM_TOPMENU_ITEMS - 1) topmenu_selected++;
+            }
+            if (input->pressed & PKGI_BUTTON_LEFT) {
+                if (topmenu_selected > 0) topmenu_selected--;
+            }
+            if (input->pressed & PKGI_BUTTON_DOWN) {
+                current_state = STORE_STATE_GRID; // Move down into the grid
             }
         } else if (current_state == STORE_STATE_GRID) {
             if (input->pressed & PKGI_BUTTON_LEFT) {
-                if (grid_selected_x > 0) {
-                    grid_selected_x--;
-                } else {
-                    current_state = STORE_STATE_CATEGORIES; // Move focus back to sidebar
-                }
+                if (grid_selected_x > 0) grid_selected_x--;
             }
             if (input->pressed & PKGI_BUTTON_RIGHT) {
                 if (grid_selected_x < GRID_COLS - 1) grid_selected_x++;
@@ -99,7 +92,11 @@ static void draw_grid_view(pkgi_input* input) {
                 grid_selected_y++;
             }
             if (input->pressed & PKGI_BUTTON_UP) {
-                if (grid_selected_y > 0) grid_selected_y--;
+                if (grid_selected_y > 0) {
+                    grid_selected_y--;
+                } else {
+                    current_state = STORE_STATE_CATEGORIES; // Move up into top menu
+                }
             }
         }
     }
@@ -108,12 +105,9 @@ static void draw_grid_view(pkgi_input* input) {
     if (grid_selected_y < grid_scroll_y) grid_scroll_y = grid_selected_y;
     if (grid_selected_y > grid_scroll_y + 2) grid_scroll_y = grid_selected_y - 2;
 
-    int start_x = SIDEBAR_WIDTH + 30; // Grid starts right of the sidebar
-    int start_y = TOPBAR_HEIGHT + 30;
+    int start_x = (VITA_WIDTH - (GRID_COLS * (GRID_COVER_W + GRID_PADDING))) / 2; // Centered
+    int start_y = TOPBAR_HEIGHT + 40;
     
-    // Draw background for content area (Classic blue gradient feel)
-    pkgi_draw_fill_rect(SIDEBAR_WIDTH, TOPBAR_HEIGHT, VITA_WIDTH - SIDEBAR_WIDTH, VITA_HEIGHT - TOPBAR_HEIGHT, 0x00082444);
-
     // Draw the actual items
     for (int y = 0; y < 3; y++) {
         for (int x = 0; x < GRID_COLS; x++) {
@@ -125,18 +119,18 @@ static void draw_grid_view(pkgi_input* input) {
             int draw_x = start_x + (x * (GRID_COVER_W + GRID_PADDING));
             int draw_y = start_y + (y * (GRID_COVER_H + GRID_PADDING));
             
-            // Highlight rendering
+            // Highlight rendering (2008 white/cyan glow)
             if (current_state == STORE_STATE_GRID && x == grid_selected_x && (grid_scroll_y + y) == grid_selected_y) {
-                // 2006 Orange/Yellow highlight glow border
-                pkgi_draw_fill_rect_z(draw_x - 4, draw_y - 4, PKGI_FONT_Z, GRID_COVER_W + 8, GRID_COVER_H + 8, 0x00FFAA00);
+                pkgi_draw_fill_rect_z(draw_x - 6, draw_y - 6, PKGI_FONT_Z, GRID_COVER_W + 12, GRID_COVER_H + 12, 0x00FFFFFF);
+                pkgi_draw_fill_rect_z(draw_x - 3, draw_y - 3, PKGI_FONT_Z, GRID_COVER_W + 6, GRID_COVER_H + 6, 0x00FFDD00); // Cyan inner
             }
             
-            // Item Background Box (Dark blue/black)
-            pkgi_draw_fill_rect_z(draw_x, draw_y, PKGI_FONT_Z, GRID_COVER_W, GRID_COVER_H, 0x00112233);
+            // Item Background Box (Dark blue placeholder)
+            pkgi_draw_fill_rect_z(draw_x, draw_y, PKGI_FONT_Z, GRID_COVER_W, GRID_COVER_H, 0x00662211);
             
             // Truncated Text
             pkgi_clip_set(draw_x, draw_y, GRID_COVER_W, GRID_COVER_H);
-            pkgi_draw_text_ttf(draw_x + 5, draw_y + GRID_COVER_H - 30, PKGI_FONT_Z, PKGI_COLOR_TEXT, item->name);
+            pkgi_draw_text_ttf(draw_x + 10, draw_y + GRID_COVER_H - 40, PKGI_FONT_Z, 0x00FFFFFF, item->name);
             pkgi_clip_remove();
             
             // Details transition
@@ -152,17 +146,17 @@ static void draw_details_view(pkgi_input* input) {
     uint32_t item_index = grid_selected_y * GRID_COLS + grid_selected_x;
     DbItem* item = pkgi_db_get(item_index);
     
-    // Details background
-    pkgi_draw_fill_rect(0, TOPBAR_HEIGHT, VITA_WIDTH, VITA_HEIGHT - TOPBAR_HEIGHT, 0x00082444);
+    // Large cover image placeholder
+    pkgi_draw_fill_rect(50, TOPBAR_HEIGHT + 50, 300, 300, 0x00662211);
     
-    pkgi_draw_text(100, 150, 0x00FFFFFF, item->name);
-    pkgi_draw_text(100, 200, 0x00AAAAAA, "Content Type: PKG");
+    pkgi_draw_text(400, TOPBAR_HEIGHT + 50, 0x00FFFFFF, item->name);
+    pkgi_draw_text(400, TOPBAR_HEIGHT + 100, 0x00AAAAAA, "Content Type: PlayStation(R)3 Format Software");
     
-    // Fake 2006 "Download" Button (Rounded pill look via rects)
-    pkgi_draw_fill_rect(100, 300, 200, 50, 0x0088CCFF);
-    pkgi_draw_text(140, 315, 0x00000000, "[X] Download");
+    // Fake 2008 "Download" Button
+    pkgi_draw_fill_rect(400, TOPBAR_HEIGHT + 200, 200, 50, 0x00444444);
+    pkgi_draw_text(440, TOPBAR_HEIGHT + 215, 0x00FFFFFF, "[X] Download");
     
-    pkgi_draw_text(100, 400, 0x00FFFFFF, "Press [O] to Go Back");
+    pkgi_draw_text(50, VITA_HEIGHT - 50, 0x00FFFFFF, "Press [O] to Go Back");
     
     if (input) {
         if (input->pressed & pkgi_cancel_button()) {
@@ -177,12 +171,12 @@ static void draw_details_view(pkgi_input* input) {
 }
 
 void store_ui_do_main(pkgi_input* input) {
+    draw_background();
     draw_top_bar();
     
     if (current_state == STORE_STATE_DETAILS) {
         draw_details_view(input);
     } else {
-        draw_sidebar();
         draw_grid_view(input);
     }
 }

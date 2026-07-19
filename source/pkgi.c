@@ -1,6 +1,6 @@
 #include "pkgi.h"
 #include "pkgi_db.h"
-#include "pkgi_menu.h"
+#include "store_ui.h"
 #include "pkgi_config.h"
 #include "pkgi_dialog.h"
 #include "pkgi_download.h"
@@ -252,6 +252,8 @@ static void cb_dialog_download(int res)
 
 static void pkgi_do_main(pkgi_input* input)
 {
+    store_ui_do_main(input);
+    return;
     int col_titleid = PKGI_MAIN_HMARGIN;
     int col_region = col_titleid + pkgi_text_width("PCSE00000") + PKGI_MAIN_COLUMN_PADDING;
     int col_installed = col_region + pkgi_text_width("USA") + PKGI_MAIN_COLUMN_PADDING;
