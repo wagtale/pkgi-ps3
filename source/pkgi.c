@@ -254,9 +254,9 @@ static void cb_dialog_download(int res)
 
 static void pkgi_do_main(pkgi_input* input)
 {
-    if (input && (input->pressed & PKGI_BUTTON_TRIANGLE))
+    if (input && (input->pressed & PKGI_BUTTON_T))
     {
-        input->pressed &= ~PKGI_BUTTON_TRIANGLE;
+        input->pressed &= ~PKGI_BUTTON_T;
         force_update = 1;
         state = StateRefreshing;
         pkgi_start_thread("refresh_thread", &pkgi_refresh_thread);
