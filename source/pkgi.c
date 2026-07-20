@@ -743,7 +743,7 @@ int main(int argc, const char* argv[])
     pkgi_input input = {0, 0, 0, 0};
     while (pkgi_update(&input) && (state != StateTerminate))
     {
-        pkgi_draw_background(background);
+        //pkgi_draw_background(background);
 
         if (state == StateUpdateDone)
         {
@@ -751,7 +751,7 @@ int main(int argc, const char* argv[])
             state = StateMain;
         }
 
-        pkgi_do_head();
+        //pkgi_do_head();
         switch (state)
         {
         case StateError:
@@ -777,7 +777,7 @@ int main(int argc, const char* argv[])
             break;
         }
 
-        pkgi_do_tail();
+        //pkgi_do_tail();
 
         if (pkgi_dialog_is_open())
         {

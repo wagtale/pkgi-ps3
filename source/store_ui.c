@@ -45,7 +45,7 @@ void store_ui_start(void) {
 
 static void draw_background(void) {
     // 2008 Store: Deep ocean blue background
-    pkgi_draw_fill_rect(0, 0, VITA_WIDTH, VITA_HEIGHT, 0x00441100); // 0xAABBGGRR - Deep blue: R=00, G=11, B=44
+    pkgi_draw_fill_rect(0, 0, VITA_WIDTH, VITA_HEIGHT, 0xFF441100); // 0xAABBGGRR - Deep blue: R=00, G=11, B=44
 }
 
 static void draw_top_bar(void) {
@@ -57,10 +57,10 @@ static void draw_top_bar(void) {
     for (int i = 0; i < NUM_TOPMENU_ITEMS; i++) {
         if (i == topmenu_selected && current_state == STORE_STATE_CATEGORIES) {
             // Highlighted top category
-            pkgi_draw_fill_rect(start_x - 10, 35, pkgi_text_width(topmenu_items[i]) + 20, 40, 0x00DDDDDD);
-            pkgi_draw_text(start_x, 45, 0x00000000, topmenu_items[i]);
+            pkgi_draw_fill_rect(start_x - 10, 35, pkgi_text_width(topmenu_items[i]) + 20, 40, 0xFFDDDDDD);
+            pkgi_draw_text(start_x, 45, 0xFF000000, topmenu_items[i]);
         } else {
-            pkgi_draw_text(start_x, 45, (i == topmenu_selected) ? 0x00FFFFFF : 0x00AAAAAA, topmenu_items[i]);
+            pkgi_draw_text(start_x, 45, (i == topmenu_selected) ? 0xFFFFFFFF : 0xFFAAAAAA, topmenu_items[i]);
         }
         start_x += pkgi_text_width(topmenu_items[i]) + 40;
     }
@@ -121,16 +121,16 @@ static void draw_grid_view(pkgi_input* input) {
             
             // Highlight rendering (2008 white/cyan glow)
             if (current_state == STORE_STATE_GRID && x == grid_selected_x && (grid_scroll_y + y) == grid_selected_y) {
-                pkgi_draw_fill_rect_z(draw_x - 6, draw_y - 6, PKGI_FONT_Z, GRID_COVER_W + 12, GRID_COVER_H + 12, 0x00FFFFFF);
-                pkgi_draw_fill_rect_z(draw_x - 3, draw_y - 3, PKGI_FONT_Z, GRID_COVER_W + 6, GRID_COVER_H + 6, 0x00FFDD00); // Cyan inner
+                pkgi_draw_fill_rect_z(draw_x - 6, draw_y - 6, PKGI_FONT_Z, GRID_COVER_W + 12, GRID_COVER_H + 12, 0xFFFFFFFF);
+                pkgi_draw_fill_rect_z(draw_x - 3, draw_y - 3, PKGI_FONT_Z, GRID_COVER_W + 6, GRID_COVER_H + 6, 0xFFFFDD00); // Cyan inner
             }
             
             // Item Background Box (Dark blue placeholder)
-            pkgi_draw_fill_rect_z(draw_x, draw_y, PKGI_FONT_Z, GRID_COVER_W, GRID_COVER_H, 0x00662211);
+            pkgi_draw_fill_rect_z(draw_x, draw_y, PKGI_FONT_Z, GRID_COVER_W, GRID_COVER_H, 0xFF662211);
             
             // Truncated Text
             pkgi_clip_set(draw_x, draw_y, GRID_COVER_W, GRID_COVER_H);
-            pkgi_draw_text_ttf(draw_x + 10, draw_y + GRID_COVER_H - 40, PKGI_FONT_Z, 0x00FFFFFF, item->name);
+            pkgi_draw_text_ttf(draw_x + 10, draw_y + GRID_COVER_H - 40, PKGI_FONT_Z, 0xFFFFFFFF, item->name);
             pkgi_clip_remove();
             
             // Details transition
@@ -147,16 +147,16 @@ static void draw_details_view(pkgi_input* input) {
     DbItem* item = pkgi_db_get(item_index);
     
     // Large cover image placeholder
-    pkgi_draw_fill_rect(50, TOPBAR_HEIGHT + 50, 300, 300, 0x00662211);
+    pkgi_draw_fill_rect(50, TOPBAR_HEIGHT + 50, 300, 300, 0xFF662211);
     
-    pkgi_draw_text(400, TOPBAR_HEIGHT + 50, 0x00FFFFFF, item->name);
-    pkgi_draw_text(400, TOPBAR_HEIGHT + 100, 0x00AAAAAA, "Content Type: PlayStation(R)3 Format Software");
+    pkgi_draw_text(400, TOPBAR_HEIGHT + 50, 0xFFFFFFFF, item->name);
+    pkgi_draw_text(400, TOPBAR_HEIGHT + 100, 0xFFAAAAAA, "Content Type: PlayStation(R)3 Format Software");
     
     // Fake 2008 "Download" Button
-    pkgi_draw_fill_rect(400, TOPBAR_HEIGHT + 200, 200, 50, 0x00444444);
-    pkgi_draw_text(440, TOPBAR_HEIGHT + 215, 0x00FFFFFF, "[X] Download");
+    pkgi_draw_fill_rect(400, TOPBAR_HEIGHT + 200, 200, 50, 0xFF444444);
+    pkgi_draw_text(440, TOPBAR_HEIGHT + 215, 0xFFFFFFFF, "[X] Download");
     
-    pkgi_draw_text(50, VITA_HEIGHT - 50, 0x00FFFFFF, "Press [O] to Go Back");
+    pkgi_draw_text(50, VITA_HEIGHT - 50, 0xFFFFFFFF, "Press [O] to Go Back");
     
     if (input) {
         if (input->pressed & pkgi_cancel_button()) {
