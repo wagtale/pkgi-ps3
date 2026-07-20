@@ -264,7 +264,7 @@ static int load_database(uint8_t db_id)
 
         sha256((uint8_t*)db_data+db_size, EXTDB_ID_LENGTH, check, 0);
 
-        if (pkgi_memequ(EXTDB_ID_SHA256, check, SHA256_DIGEST_SIZE))
+        if (pkgi_memequ(db_data+db_size, "Title ID", 8) || pkgi_memequ(EXTDB_ID_SHA256, check, SHA256_DIGEST_SIZE))
         {
             dbf.delimiter = '\t';
             dbf.total_columns = 10;
