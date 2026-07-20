@@ -24,4 +24,4 @@ typedef enum {
 
 void store_ui_init(void);
 void store_ui_start(void);
-void store_ui_do_main(pkgi_input* input);
+void store_ui_do_main(pkgi_input* input, Config* config);

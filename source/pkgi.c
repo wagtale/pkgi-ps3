@@ -263,7 +263,7 @@ static void pkgi_do_main(pkgi_input* input)
         return;
     }
 
-    store_ui_do_main(input);
+    store_ui_do_main(input, &config);
     return;
     int col_titleid = PKGI_MAIN_HMARGIN;
     int col_region = col_titleid + pkgi_text_width("PCSE00000") + PKGI_MAIN_COLUMN_PADDING;
