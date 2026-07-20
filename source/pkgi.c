@@ -53,13 +53,15 @@ static const char* pkgi_get_cancel_str(void)
     return pkgi_cancel_button() == PKGI_BUTTON_O ? PKGI_UTF8_O : PKGI_UTF8_X;
 }
 
+static int force_update = 0;
 static void pkgi_refresh_thread(void)
 {
     LOG("starting update");
 
-    if (pkgi_menu_result() == MenuResultRefresh)
+    if (force_update || pkgi_menu_result() == MenuResultRefresh)
     {
         pkgi_db_update((char*) &refresh_url, sizeof(refresh_url[0]), error_state, sizeof(error_state));
+        force_update = 0;
     }
 
     if (pkgi_db_reload(error_state, sizeof(error_state)))
@@ -252,6 +254,15 @@ static void cb_dialog_download(int res)
 
 static void pkgi_do_main(pkgi_input* input)
 {
+    if (input && (input->pressed & PKGI_BUTTON_TRIANGLE))
+    {
+        input->pressed &= ~PKGI_BUTTON_TRIANGLE;
+        force_update = 1;
+        state = StateRefreshing;
+        pkgi_start_thread("refresh_thread", &pkgi_refresh_thread);
+        return;
+    }
+
     store_ui_do_main(input);
     return;
     int col_titleid = PKGI_MAIN_HMARGIN;
